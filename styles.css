@@ -1,0 +1,228 @@
+@import  "https://fonts.googleapis.com/css?family=Roboto";
+
+@import  "https://fonts.googleapis.com/css?family=Alfa+Slab+One";
+
+@import  "https://fonts.googleapis.com/css?family=VT323";
+
+body {
+    background-color: #FFFFFD;
+}
+
+#game {
+    width: 520px;
+    height: 520px;
+    margin: 75px auto 0;
+    border-radius: 50%;
+    background-color: #424242;
+    position: relative;
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+}
+
+#buttons {
+    position: absolute;
+    border-radius: 50%;
+    height: 500px;
+    width: 500px;
+    top: 50%;
+    left: 50%;
+    margin: -250px 0 0 -250px;
+}
+
+#s1 {
+/* GREEN */
+    background: radial-gradient(#00B241 15%,#19b954 85%);
+    border-radius: 250px 3px 3px 3px;
+    width: 230px;
+    height: 230px;
+}
+
+.s1Bright {
+    background: #99FFBE !important;
+}
+
+.s1Dark {
+    background: #006424 !important;
+}
+
+#s2 {
+/* RED */
+    background: radial-gradient(#EA2C1C 15%,#EC4132 85%);
+    border-radius: 3px 250px 3px 3px;
+    width: 230px;
+    height: 230px;
+}
+
+.s2Bright {
+    background: #F6A8A2 !important;
+}
+
+.s2Dark {
+    background: #5B0F08 !important;
+}
+
+#s3 {
+/* YELLOW */
+    background: radial-gradient(#FEF10B 15%,#FEF223 85%);
+    border-radius: 3px 3px 3px 250px;
+    width: 230px;
+    height: 230px;
+}
+
+.s3Bright {
+    background: #FFFBBE !important;
+}
+
+.s3Dark {
+    background: #645E00 !important;
+}
+
+#s4 {
+/* BLUE */
+    background: radial-gradient(#0093F3 15%,#199DF4 85%);
+    border-radius: 3px 3px 250px 3px;
+    width: 230px;
+    height: 230px;
+}
+
+.s4Bright {
+    background: #99D7FF !important;
+}
+
+.s4Dark {
+    background: #003C64 !important;
+}
+
+button {
+    border: none;
+    margin: 10px;
+}
+
+#center {
+    height: 280px;
+    width: 280px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -140px 0 0 -140px;
+    background-color: #424242;
+    text-align: center;
+}
+
+#panel {
+    height: 240px;
+    width: 240px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -120px 0 0 -120px;
+    box-shadow: inset 2px 2px 0 -2px #CFCFCF;
+    background: radial-gradient(#E0E2E1 30%,#D0D0D0 70%);
+    border-top: 1px solid #CCC;
+}
+
+#simon {
+    margin-top: 25px;
+    font-family: 'Alfa Slab One',cursive;
+    font-size: 45px;
+    color: #252525;
+    margin-bottom: 8px;
+    text-shadow: 0 5px 5px #E0E2E1;
+}
+
+#reset {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(#FEF10B 15%,#FEF223 85%);
+    border: 2px solid #424242;
+    margin-left: 60px;
+    float: left;
+    margin-bottom: 0;
+    margin-top: 0;
+    box-shadow: 0 4px 2px #747474;
+}
+
+#reset:active {
+    box-shadow: 0 3px 2px #747474;
+    transform: translateY(1px);
+    background-color: #D1C701;
+}
+
+#strict {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(#0093F3 15%,#199DF4 85%);
+    border: 2px solid #424242;
+    float: right;
+    margin-right: 60px;
+    margin-bottom: 0;
+    margin-top: 0;
+    box-shadow: 0 4px 2px #747474;
+}
+
+#strictLight {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    position: absolute;
+    top: 138px;
+    left: 161px;
+    border: 1px solid #424242;
+    display: inline-block;
+    background-color: #5D0006;
+}
+
+.strictLightOn {
+    background-color: #FF1200 !important;
+}
+
+#resetText {
+    position: relative;
+    text-align: center;
+    font-size: 15px;
+    left: 53px;
+    float: left;
+    margin-top: 5px;
+    font-family: 'Roboto',sans-serif;
+    text-shadow: 0 1px 1px #E0E2E1;
+}
+
+#strictText {
+    position: relative;
+    text-align: center;
+    font-size: 15px;
+    float: right;
+    margin-right: 48px;
+    margin-top: 5px;
+    font-family: 'Roboto',sans-serif;
+    text-shadow: 0 1px 1px #E0E2E1;
+}
+
+#round {
+    margin: 14px auto 12px;
+    background-color: #424242;
+    width: 60px;
+    color: #D9340F;
+    font-family: 'VT323',monospace;
+    font-size: 35px;
+    border-radius: 2px;
+    border-top: 1px solid #272727;
+}
+
+.strictOn {
+    background-color: #007FD2;
+    box-shadow: 0 3px 2px #747474;
+    transform: translateY(1px);
+}
+
+@media screen and (max-width: 530px) {
+    #game {
+        transform: scale(0.6);
+        margin-top: -40px;
+        left: 50%;
+        margin-left: -261px;
+    }
+}

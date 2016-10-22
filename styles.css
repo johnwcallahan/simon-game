@@ -1,7 +1,5 @@
 @import  "https://fonts.googleapis.com/css?family=Roboto";
-
 @import  "https://fonts.googleapis.com/css?family=Alfa+Slab+One";
-
 @import  "https://fonts.googleapis.com/css?family=VT323";
 
 body {
@@ -212,7 +210,7 @@ button {
     border-top: 1px solid #272727;
 }
 
-.strictOn {
+.strictButtonDepressed {
     background-color: #007FD2;
     box-shadow: 0 3px 2px #747474;
     transform: translateY(1px);

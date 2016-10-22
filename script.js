@@ -1,236 +1,285 @@
 $(document).ready(function() {
-var gameLength = 20;
-var winningSequence = generateWinningSequence(gameLength);
-var strictMode = false;
-var clickEnabled = false;
-var roundSequence, interval;
-var userSequence = [];
-var roundIndex = 0;
-var round = 1;
+  //=============================================================================
+  // Game parameters
+  //=============================================================================
+  var gameLength = 4;
+  var round = 1;
+  var winningSequence = generateWinningSequence(gameLength);
 
-var s1Sound = new Audio(
-    'https://s3.amazonaws.com/freecodecamp/simonSound1.mp3');
-var s2Sound = new Audio(
-    'https://s3.amazonaws.com/freecodecamp/simonSound2.mp3');
-var s3Sound = new Audio(
-    'https://s3.amazonaws.com/freecodecamp/simonSound3.mp3');
-var s4Sound = new Audio(
-    'https://s3.amazonaws.com/freecodecamp/simonSound4.mp3');
-var sounds = {
-    's1': s1Sound,
-    's2': s2Sound,
-    's3': s3Sound,
-    's4': s4Sound
-};
-$('#reset').click(function() {
-    if (clickEnabled === false) return;
-    resetGame();
-});
-$('#strict').click(function() {
-    if (strictMode === false) {
-        strictMode = true;
-        $('#strictLight').addClass('strictLightOn');
-        $('#strict').addClass('strictOn');
-    } else {
-        strictMode = false;
-        $('#strictLight').removeClass('strictLightOn')
-        $('#strict').removeClass('strictOn');
-    }
-});
-$('.panel').click(function() {
-    if (clickEnabled === false) return;
-    clickEnabled = false;
-    var panel = $(this).attr('id');
-    userTurn(panel);
-    if (roundIndex !== 0) {
-        setTimeout(function() {
-            clickEnabled = true;
-        }, 450)
-    }
-});
-
-function generateWinningSequence(gameLength) {
+  // returns an array (length: gameLength) of random numbers between 1 and 4
+  function generateWinningSequence(gameLength) {
     var sequence = [];
     for (var i = 0; i < gameLength; i++) {
-        var random = Math.random() * 4 + 1;
-        sequence.push(Math.floor(random));
+      var random = (Math.random() * 4) + 1;
+      sequence.push(Math.floor(random));
     }
     return sequence;
-}
+  }
 
-function resetGame() {
-    roundFlash();
+  // speed that the panels flash during computer's turn (increases at round 9)
+  function flashInterval(round) {
+    return round < 9 ? 900 : 700;
+  }
+
+  var sounds = {
+    's1': new Howl({
+      src: ['https://s3.amazonaws.com/freecodecamp/simonSound1.mp3'],
+      html5: true
+    }),
+    's2': new Howl({
+      src: ['https://s3.amazonaws.com/freecodecamp/simonSound2.mp3'],
+      html5: true
+    }),
+    's3': new Howl({
+      src: ['https://s3.amazonaws.com/freecodecamp/simonSound3.mp3'],
+      html5: true
+    }),
+    's4': new Howl({
+      src: ['https://s3.amazonaws.com/freecodecamp/simonSound4.mp3'],
+      html5: true
+    }),
+  };
+  var strictMode = false;
+  var clickEnabled = false;
+
+  //=============================================================================
+  // Interface functions
+  //=============================================================================
+
+  // reset game
+  $('#reset').click(function() {
+    if (!clickEnabled) return;
+    resetGame();
+  });
+
+  function resetGame() {
+    roundDisplayBlink();
     allDarkFlash();
+    // reset game parameters after animation
     setTimeout(function() {
-        userSequence = [];
-        roundIndex = 0;
-        round = 1;
-        winningSequence = generateWinningSequence(gameLength);
-        computerTurn();
+      userSequence = [];
+      roundIndex = 0;
+      round = 1;
+      winningSequence = generateWinningSequence(gameLength);
+      computerTurn();
     }, 1400);
-}
+  }
 
-function computerTurn() {
+  // toggle strict mode
+  $('#strict').click(function() {
+    if (!strictMode) {
+      strictMode = true;
+      $('#strictLight').addClass('strictLightOn');
+      $('#strict').addClass('strictButtonDepressed');
+    } else {
+      strictMode = false;
+      $('#strictLight').removeClass('strictLightOn');
+      $('#strict').removeClass('strictButtonDepressed');
+    }
+  });
+
+  // update round display, with 0 in front if round is single digit
+  function updateRoundDisplay(round) {
+    var roundDisplay;
+    roundDisplay = round < 10 ? '0' + round : round;
+    $('#round').text(roundDisplay);
+  }
+
+  //=============================================================================
+  // Game logic
+  //=============================================================================
+  var roundSequence;
+
+  function computerTurn() {
+    // update round display after slight delay
     setTimeout(function() {
-        $('#round').text(roundDisplay(round));
+      updateRoundDisplay(round);
     }, 450);
+
+    // the sequence to display this round
     roundSequence = winningSequence.slice(0, round);
+
+    // walk through roundSequence, flashing the corresponding panels
     var counter = 0;
     var flashes = setInterval(function() {
-        clickEnabled = false;
-        panelFlash('s' + winningSequence[counter]);
-        counter++;
-        if (counter === roundSequence.length) {
-            clickEnabled = true;
-            clearInterval(flashes);
-        }
+      clickEnabled = false;
+      panelFlash('s' + winningSequence[counter]);
+      counter++;
+      if (counter === roundSequence.length) {
+        clearInterval(flashes);
+        clickEnabled = true;
+      }
     }, flashInterval(round));
-}
+  }
 
-function userTurn(panel) {
+  $('.panel').click(function() {
+    if (!clickEnabled) return;
+    clickEnabled = false;
+    var panel = $(this).attr('id');
+    userGuess(panel);
+
+    /* Safari has trouble with multiple sounds even with howler.js, so a slight
+    delay has been added before enabling mouse click between guesses to help offset
+    the spotty performance  */
+    if (roundIndex !== 0) {
+      setTimeout(function() {
+        clickEnabled = true;
+      }, 100);
+    }
+  });
+
+  var userSequence = []; // store the user's guesses
+  var roundIndex = 0; // keeps track of the position of the sequence the user is guessing
+
+  function userGuess(panel) {
     roundIndex++;
     userSequence.push(parseInt(panel.slice(1)));
+
+    // if the user makes an incorrect guess
     if (userSequence[roundIndex - 1] !== roundSequence[roundIndex - 1]) {
-        clickEnabled = false;
-        return incorrectGuess(panel);
+      clickEnabled = false;
+      roundIndex = 0;
+      userSequence = [];
+      return incorrectGuess(panel);
     }
+    // if the user has successfully completed the number of rounds required to win
     if (roundIndex === roundSequence.length && round === gameLength) {
-        clickEnabled = false;
-        return win(panel);
+      clickEnabled = false;
+      return win(panel);
     }
     panelFlash(panel);
-    if (roundIndex === roundSequence.length) {
-        clickEnabled = false;
-        round++;
-        roundIndex = 0;
-        userSequence = [];
-        setTimeout(function() {
-            computerTurn()
-        }, 375);
-    }
-}
 
-function incorrectGuess(panel) {
-    var ips; //Incorrect Panel Sequence
-    switch (panel) {
-        case 's1':
-            ips = [1, 3, 4, 2];
-            break;
-        case 's2':
-            ips = [2, 1, 3, 4];
-            break;
-        case 's3':
-            ips = [3, 4, 2, 1];
-            break;
-        case 's4':
-            ips = [4, 2, 1, 3];
-            break;
+    // if the user has successfully completed the current round
+    if (roundIndex === roundSequence.length) {
+      clickEnabled = false;
+      round++;
+      roundIndex = 0;
+      userSequence = [];
+      setTimeout(function() {
+        computerTurn();
+      }, 375);
     }
-    roundFlash();
+  }
+
+  function incorrectGuess(panel) {
+    /* darken the panels counter-clockwise, starting with the panel
+    that the user guessed */
+    var panelSeq; // (incorrect panel sequence)
+    switch (panel) {
+      case 's1':
+        panelSeq = [1, 3, 4, 2];
+        break;
+      case 's2':
+        panelSeq = [2, 1, 3, 4];
+        break;
+      case 's3':
+        panelSeq = [3, 4, 2, 1];
+        break;
+      case 's4':
+        panelSeq = [4, 2, 1, 3];
+        break;
+    }
+    roundDisplayBlink();
     sounds[panel].play();
-    $('#s' + ips[0]).addClass('s' + ips[0] + 'Dark');
+    $('#s' + panelSeq[0]).addClass('s' + panelSeq[0] + 'Dark');
     setTimeout(function() {
-        $('#s' + ips[1]).addClass('s' + ips[1] + 'Dark');
+      $('#s' + panelSeq[1]).addClass('s' + panelSeq[1] + 'Dark');
     }, 56);
     setTimeout(function() {
-        $('#s' + ips[2]).addClass('s' + ips[2] + 'Dark');
+      $('#s' + panelSeq[2]).addClass('s' + panelSeq[2] + 'Dark');
     }, 112);
     setTimeout(function() {
-        $('#s' + ips[3]).addClass('s' + ips[3] + 'Dark');
+      $('#s' + panelSeq[3]).addClass('s' + panelSeq[3] + 'Dark');
     }, 225);
-    setTimeout(function() {
-        allNormalColors();
-        if (strictMode === false) {
-            $('#round').text(roundDisplay());
-            roundIndex = 0;
-            userSequence = [];
-            computerTurn();
-        } else if (strictMode === true) {
-            resetGame();
-        }
-    }, 2200);
-}
 
-function win(panel) {
-    sounds[panel].play();
-    var wps; //Winning Panel Sequence
-    switch (panel) {
-        case 's1':
-            wps = [1, 2, 4, 3];
-            break;
-        case 's2':
-            wps = [2, 4, 3, 1];
-            break;
-        case 's3':
-            wps = [3, 1, 2, 4];
-            break;
-        case 's4':
-            wps = [4, 3, 1, 2];
-            break;
-    }
-    $('#s' + wps[0]).addClass('s' + wps[0] + 'Bright');
+    /* after animation, reset game if strict mode is on,
+    otherwise replay the current round */
     setTimeout(function() {
-        $('#s' + wps[1]).addClass('s' + wps[1] + 'Bright');
+      allNormalColors();
+      if (!strictMode) {
+        $('#round').text(updateRoundDisplay());
+        computerTurn();
+      } else {
+        resetGame();
+      }
+    }, 2200);
+  }
+
+  function win(panel) {
+    sounds[panel].play();
+    /* lighten the panels counter-clockwise, starting with the panel
+    that the user guessed */
+    var panelSeq;
+    switch (panel) {
+      case 's1':
+        panelSeq = [1, 2, 4, 3];
+        break;
+      case 's2':
+        panelSeq = [2, 4, 3, 1];
+        break;
+      case 's3':
+        panelSeq = [3, 1, 2, 4];
+        break;
+      case 's4':
+        panelSeq = [4, 3, 1, 2];
+        break;
+    }
+    $('#s' + panelSeq[0]).addClass('s' + panelSeq[0] + 'Bright');
+    setTimeout(function() {
+      $('#s' + panelSeq[1]).addClass('s' + panelSeq[1] + 'Bright');
     }, 250);
     setTimeout(function() {
-        $('#s' + wps[2]).addClass('s' + wps[2] + 'Bright');
+      $('#s' + panelSeq[2]).addClass('s' + panelSeq[2] + 'Bright');
     }, 375);
     setTimeout(function() {
-        $('#s' + wps[3]).addClass('s' + wps[3] + 'Bright');
+      $('#s' + panelSeq[3]).addClass('s' + panelSeq[3] + 'Bright');
     }, 500);
     setTimeout(function() {
-        allBrightFlash();
-        roundFlash();
+      allBrightFlash();
+      roundDisplayBlink();
     }, 900);
-    setTimeout(function() {
-        resetGame();
-    }, 4500);
-}
-setTimeout(computerTurn(), 900);
 
-//=========ANIMATION====================================================
-function panelFlash(panel) {
+    // after animation, reset game
+    setTimeout(function() {
+      resetGame();
+    }, 4500);
+  }
+
+  //=============================================================================
+  // Animations
+  //=============================================================================
+
+  // flash single panel and play sound
+  function panelFlash(panel) {
     sounds[panel].play();
     $('#' + panel).addClass(panel + 'Bright');
     setTimeout(function() {
-        $('#' + panel).removeClass(panel + 'Bright');
+      $('#' + panel).removeClass(panel + 'Bright');
     }, 250);
-}
+  }
 
-function roundDisplay(round) {
-    if (round < 10) {
-        return '0' + round;
-    } else {
-        return round;
-    }
-}
-
-function flashInterval(round) {
-    return round < 9 ? 900 : 600;
-}
-
-function allDarken() {
+  function allDarken() {
     $('#s1').addClass('s1Dark');
     $('#s2').addClass('s2Dark');
     $('#s3').addClass('s3Dark');
     $('#s4').addClass('s4Dark');
-}
+  }
 
-function allNormalColors() {
+  function allNormalColors() {
     $('#s1').removeClass('s1Bright s1Dark');
     $('#s2').removeClass('s2Bright s2Dark');
     $('#s3').removeClass('s3Bright s3Dark');
     $('#s4').removeClass('s4Bright s4Dark');
-}
+  }
 
-function allBrighten() {
+  function allBrighten() {
     $('#s1').addClass('s1Bright');
     $('#s2').addClass('s2Bright');
     $('#s3').addClass('s3Bright');
     $('#s4').addClass('s4Bright');
-}
+  }
 
-function roundFlash() {
+  function roundDisplayBlink() {
     $('#round').text('--');
     setTimeout(function() {
       $('#round').text('!!');
@@ -247,9 +296,9 @@ function roundFlash() {
         }, 225);
       }, 225);
     }, 393);
-}
+  }
 
-function allDarkFlash() {
+  function allDarkFlash() {
     allDarken();
     setTimeout(function() {
       allNormalColors();
@@ -266,9 +315,9 @@ function allDarkFlash() {
         }, 225);
       }, 225);
     }, 393);
-}
+  }
 
-function allBrightFlash() {
+  function allBrightFlash() {
     allNormalColors();
     setTimeout(function() {
       allBrighten();
@@ -284,6 +333,11 @@ function allBrightFlash() {
           }, 225);
         }, 225);
       }, 225);
-    }, 393)
-}
+    }, 393);
+  }
+
+  //=============================================================================
+  // Start game on page load after 900ms
+  //=============================================================================
+  setTimeout(computerTurn(), 900);
 });

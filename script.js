@@ -1,12 +1,12 @@
 $(document).ready(function() {
-  //=============================================================================
+  //============================================================================
   // Game parameters
-  //=============================================================================
-  var gameLength = 4;
+  //============================================================================
+  var gameLength = 20;
   var round = 1;
   var winningSequence = generateWinningSequence(gameLength);
 
-  // returns an array (length: gameLength) of random numbers between 1 and 4
+  //Returns array of length == gameLength of random numbers between 1 and 4
   function generateWinningSequence(gameLength) {
     var sequence = [];
     for (var i = 0; i < gameLength; i++) {
@@ -42,11 +42,11 @@ $(document).ready(function() {
   var strictMode = false;
   var clickEnabled = false;
 
-  //=============================================================================
+  //============================================================================
   // Interface functions
-  //=============================================================================
+  //============================================================================
 
-  // reset game
+  //Reset game
   $('#reset').click(function() {
     if (!clickEnabled) return;
     resetGame();
@@ -55,7 +55,7 @@ $(document).ready(function() {
   function resetGame() {
     roundDisplayBlink();
     allDarkFlash();
-    // reset game parameters after animation
+    //Reset game parameters after animation
     setTimeout(function() {
       userSequence = [];
       roundIndex = 0;
@@ -65,7 +65,7 @@ $(document).ready(function() {
     }, 1400);
   }
 
-  // toggle strict mode
+  //Toggle strict mode
   $('#strict').click(function() {
     if (!strictMode) {
       strictMode = true;
@@ -78,28 +78,28 @@ $(document).ready(function() {
     }
   });
 
-  // update round display, with 0 in front if round is single digit
+  //Update round display, with 0 in front if round is single digit
   function updateRoundDisplay(round) {
     var roundDisplay;
     roundDisplay = round < 10 ? '0' + round : round;
     $('#round').text(roundDisplay);
   }
 
-  //=============================================================================
+  //============================================================================
   // Game logic
-  //=============================================================================
+  //============================================================================
   var roundSequence;
 
   function computerTurn() {
-    // update round display after slight delay
+    //Update round display after slight delay
     setTimeout(function() {
       updateRoundDisplay(round);
     }, 450);
 
-    // the sequence to display this round
+    //Sequence to display this round
     roundSequence = winningSequence.slice(0, round);
 
-    // walk through roundSequence, flashing the corresponding panels
+    //Walk through roundSequence, flashing the corresponding panels
     var counter = 0;
     var flashes = setInterval(function() {
       clickEnabled = false;
@@ -119,8 +119,8 @@ $(document).ready(function() {
     userGuess(panel);
 
     /* Safari has trouble with multiple sounds even with howler.js, so a slight
-    delay has been added before enabling mouse click between guesses to help offset
-    the spotty performance  */
+    delay has been added before enabling mouse click between guesses to help 
+    offset the spotty performance */
     if (roundIndex !== 0) {
       setTimeout(function() {
         clickEnabled = true;
@@ -128,28 +128,28 @@ $(document).ready(function() {
     }
   });
 
-  var userSequence = []; // store the user's guesses
-  var roundIndex = 0; // keeps track of the position of the sequence the user is guessing
+  var userSequence = []; //Store the user's guesses
+  var roundIndex = 0; //Keeps track of position that the user is guessing
 
   function userGuess(panel) {
     roundIndex++;
     userSequence.push(parseInt(panel.slice(1)));
 
-    // if the user makes an incorrect guess
+    //If the user makes an incorrect guess
     if (userSequence[roundIndex - 1] !== roundSequence[roundIndex - 1]) {
       clickEnabled = false;
       roundIndex = 0;
       userSequence = [];
       return incorrectGuess(panel);
     }
-    // if the user has successfully completed the number of rounds required to win
+    //If the user has successfully completed number of rounds required to win
     if (roundIndex === roundSequence.length && round === gameLength) {
       clickEnabled = false;
       return win(panel);
     }
     panelFlash(panel);
 
-    // if the user has successfully completed the current round
+    //If the user has successfully completed the current round
     if (roundIndex === roundSequence.length) {
       clickEnabled = false;
       round++;
@@ -162,9 +162,9 @@ $(document).ready(function() {
   }
 
   function incorrectGuess(panel) {
-    /* darken the panels counter-clockwise, starting with the panel
+    /* Darken the panels counter-clockwise, starting with the panel
     that the user guessed */
-    var panelSeq; // (incorrect panel sequence)
+    var panelSeq;
     switch (panel) {
       case 's1':
         panelSeq = [1, 3, 4, 2];
@@ -192,8 +192,7 @@ $(document).ready(function() {
       $('#s' + panelSeq[3]).addClass('s' + panelSeq[3] + 'Dark');
     }, 225);
 
-    /* after animation, reset game if strict mode is on,
-    otherwise replay the current round */
+    //After animation, reset game if strict mode is on, or replay current round
     setTimeout(function() {
       allNormalColors();
       if (!strictMode) {
@@ -207,7 +206,7 @@ $(document).ready(function() {
 
   function win(panel) {
     sounds[panel].play();
-    /* lighten the panels counter-clockwise, starting with the panel
+    /* Lighten the panels counter-clockwise, starting with the panel
     that the user guessed */
     var panelSeq;
     switch (panel) {
@@ -239,7 +238,7 @@ $(document).ready(function() {
       roundDisplayBlink();
     }, 900);
 
-    // after animation, reset game
+    //After animation, reset game
     setTimeout(function() {
       resetGame();
     }, 4500);
@@ -249,7 +248,7 @@ $(document).ready(function() {
   // Animations
   //=============================================================================
 
-  // flash single panel and play sound
+  //Flash single panel and play sound
   function panelFlash(panel) {
     sounds[panel].play();
     $('#' + panel).addClass(panel + 'Bright');
